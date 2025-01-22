@@ -112,7 +112,7 @@ gaze_data_buffer = []
 # Setting psychopy specific variables
 
 # Window setup
-win = visual.Window(size=winsize,units='pix',fullscr=True, screen = 1)
+win = visual.Window(size=winsize,units='pix',fullscr=True, screen = 2, color='black')
 
 # Fixation circle
 fixation = visual.Circle(win, radius=10, lineColor='white', fillColor=None, pos=(0, 0))
