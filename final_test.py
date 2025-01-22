@@ -1,11 +1,6 @@
 # Final test phase
 # Pushkar Singh, 22nd January, 2025
 
-"""
-    Tasks
-    - Implementing the timer is still left.
-"""
-
 from psychopy import visual, core, event, data, prefs, gui
 from psychopy.event import Mouse
 import random
@@ -16,7 +11,7 @@ prefs.hardware['audioLib'] = ['PTB']
 from psychopy import sound
 import tobii_research as tr
 
-# since all checks happen only with right eye cooridinates, this variable stores the right eye data. The structure being : r.validity , r.x_cooridinate, r.y_coordinate
+# since all checks happen only with right eye coordinates, this variable stores the right eye data. The structure being : r.validity , r.x_coordinate, r.y_coordinate
 
 r = np.zeros(3)
 
@@ -127,7 +122,7 @@ circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white')
 square = visual.Rect(win, width=20, height=20, fillColor='white', lineColor='white')
 
 # Timing in milliseconds
-time_in_roi = 800  # Fixation ROI time
+time_in_roi = 500  # Fixation ROI time
 timeout_limit = 5000  # Timeout for response
 inter_trial_interval = 1000  # Blank interval between trials
 
@@ -174,22 +169,26 @@ for thisTrial in trials:
     fixation.draw()
     win.flip()
     
-    # Wait for mouse in fixation ROI
-    timer = core.Clock()
+    # New: Timer for fixation
+    fixation_timer = core.Clock()
+    fixation_timer.reset()
     while True:
         if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
-            fixation.fillColor = 'white'
-            trigger = "gaze on fixation"
-            fixation.draw()
-            win.flip()
-            break
-        elif not (r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top):
-            timer.reset()
+            # Check if fixation has been maintained for 500ms
+            if fixation_timer.getTime() * 1000 >= time_in_roi:
+                fixation.fillColor = 'white'
+                trigger = "gaze on fixation"
+                fixation.draw()
+                win.flip()
+                break
+        else:
+            fixation_timer.reset()  # Reset timer if gaze leaves ROI
         fixation.draw()
         win.flip()
     
     # Reset timer for response time
     response_timer = core.Clock()
+    response_timer.reset()
     
     # Set colors for this trial
     circle.fillColor = thisTrial['circle_color']
@@ -219,7 +218,6 @@ for thisTrial in trials:
     # Wait for response or timeout
     correct_response = False
     errant_response = False
-    # while response_timer.getTime() * 1000 < timeout_limit:
     while True:
         if r[0] == 1:  # Check if right eye data is valid
             if thisTrial['target'] == 'circle' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
@@ -235,23 +233,15 @@ for thisTrial in trials:
         else:
             print('Eye not on screen.')
 
-    if response_timer.getTime() * 1000 >= timeout_limit:
-        break  # Timeout
+        # New: Check for timeout
+        if response_timer.getTime() * 1000 >= timeout_limit:
+            break  # Timeout
 
-    # Redraw to keep the screen updated
-    fixation.draw()
-    circle.draw()
-    square.draw()
-    win.flip()
-
-    if response_timer.getTime() * 1000 >= timeout_limit:
-        break  # Timeout
-
-    # Redraw to keep the screen updated
-    fixation.draw()
-    circle.draw()
-    square.draw()
-    win.flip()
+        # Redraw to keep the screen updated
+        fixation.draw()
+        circle.draw()
+        square.draw()
+        win.flip()
     
     # Record response data
     response_time = response_timer.getTime() * 1000

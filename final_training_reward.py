@@ -163,14 +163,16 @@ for thisTrial in trials:
     
     # Wait for eye in fixation ROI
     timer = core.Clock()
+    timer.reset()
+
     while True:
         if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
-            print(timer.getTime())
-            fixation.fillColor = 'white'
-            trigger = "gaze on fixation"
-            fixation.draw()
-            win.flip()
-            break
+            if timer.getTime() * 1000 >= time_in_roi:
+                fixation.fillColor = 'white'
+                trigger = "gaze on fixation"
+                fixation.draw()
+                win.flip()
+                break
         elif not (r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top):
             timer.reset()
         fixation.draw()
@@ -198,18 +200,25 @@ for thisTrial in trials:
     square.draw()
     win.flip()
     
-    # Wait for eye to move to opposite side (or beyond), measure reaction time
+    # Reset the timer when the square appears
+    square_timer = core.Clock()
+    square_timer.reset()  # Start timing from when the square is shown
+
     while True:
-        if (side == 'left' and r[0] == 1 and r[1] >= x_lim) or (side == 'right' and  r[0] == 1 and r[1] <= x_lim):
-            trigger = "antisaccade"
-            reaction_time = square_timer.getTime() * 1000  # Time from square display to ROI entry
-            thisExp.addData('reaction_time', reaction_time)
-            thisExp.addData('square_side', side)
+        if (side == 'left' and r[0] == 1 and r[1] >= x_lim) or (side == 'right' and r[0] == 1 and r[1] <= x_lim):
+            # Measure the time since the square was displayed
+            reaction_time = square_timer.getTime() * 1000
+        
+            # Check if the eye has stayed on the opposite side long enough
             if reaction_time >= time_in_new_roi:
+                trigger = "antisaccade"
+                thisExp.addData('reaction_time', reaction_time)
+                thisExp.addData('square_side', side)
                 break
-        fixation.draw()
-        square.draw()
-        win.flip()
+    # Redraw to keep the screen updated
+    fixation.draw()
+    square.draw()
+    win.flip()
     
     # Reset fixation to hollow for next trial
     fixation.fillColor = None
