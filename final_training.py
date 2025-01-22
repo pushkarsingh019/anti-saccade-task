@@ -128,13 +128,17 @@ inter_trial_interval = 1000
 # Trial conditions
 trial_conditions = [{'trial_num': i+1} for i in range(10)]  # Example condition for 5 trials
 
+data_folder = 'data'
+if not os.path.exists(data_folder):
+    os.makedirs(data_folder)
+
 # Experiment handler
 thisExp = data.ExperimentHandler(name=experiment_name, version='1.0',
                                  extraInfo={'participant': participant_id},
                                  runtimeInfo=None,
                                  originPath=None,
                                  savePickle=True, saveWideText=True,
-                                 dataFileName=f'{experiment_name}_{participant_id}')
+                                 dataFileName=os.path.join(data_folder, f'{experiment_name}_{participant_id}'))
 
 # Setup trial handler 
 trials = data.TrialHandler(trial_conditions, nReps=1, method='random',
