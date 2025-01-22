@@ -169,20 +169,21 @@ for thisTrial in trials:
     fixation.draw()
     win.flip()
     
-    # New: Timer for fixation
-    fixation_timer = core.Clock()
-    fixation_timer.reset()
+    # Wait for eye in fixation ROI for a certain number of frames
+    fixation_frames = 0
+    frames_per_500ms = int(0.5 / win.monitorFramePeriod)  # Convert 500ms to frames
+    
     while True:
         if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
-            # Check if fixation has been maintained for 500ms
-            if fixation_timer.getTime() * 1000 >= time_in_roi:
+            fixation_frames += 1
+            if fixation_frames >= frames_per_500ms:
                 fixation.fillColor = 'white'
                 trigger = "gaze on fixation"
                 fixation.draw()
                 win.flip()
                 break
         else:
-            fixation_timer.reset()  # Reset timer if gaze leaves ROI
+            fixation_frames = 0  # Reset frame count if gaze leaves ROI
         fixation.draw()
         win.flip()
     
@@ -218,6 +219,9 @@ for thisTrial in trials:
     # Wait for response or timeout
     correct_response = False
     errant_response = False
+    response_frames = 0
+    frames_timeout_limit = int(timeout_limit / 1000 / win.monitorFramePeriod)  # Convert timeout_limit to frames
+    
     while True:
         if r[0] == 1:  # Check if right eye data is valid
             if thisTrial['target'] == 'circle' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
@@ -227,14 +231,14 @@ for thisTrial in trials:
                 correct_response = True
                 break
             elif (thisTrial['target'] == 'circle' and square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top) or \
-             (thisTrial['target'] == 'square' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top):
+                 (thisTrial['target'] == 'square' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top):
                 errant_response = True
                 break
         else:
             print('Eye not on screen.')
 
-        # New: Check for timeout
-        if response_timer.getTime() * 1000 >= timeout_limit:
+        response_frames += 1
+        if response_frames >= frames_timeout_limit:
             break  # Timeout
 
         # Redraw to keep the screen updated
@@ -244,7 +248,7 @@ for thisTrial in trials:
         win.flip()
     
     # Record response data
-    response_time = response_timer.getTime() * 1000
+    response_time = response_frames * win.monitorFramePeriod * 1000  # Convert back to milliseconds
     if correct_response:
         thisExp.addData('response', 'correct')
     elif errant_response:
