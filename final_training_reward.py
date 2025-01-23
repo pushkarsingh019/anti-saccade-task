@@ -123,8 +123,8 @@ fixation = visual.Circle(win, radius=fixation_diameter/2, lineColor='white', fil
 square = visual.Rect(win, width=50, height=50, fillColor='blue', lineColor='blue')
 
 # Timing in milliseconds
-time_in_roi = 800
-time_in_new_roi = 1000  # New ROI time in milliseconds
+time_in_roi = 500  # Fixation ROI time
+time_in_new_roi = 1000  # Antisaccade ROI time.
 inter_trial_interval = 1000
 
 # Trial conditions
@@ -156,6 +156,15 @@ Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
 x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter + buffer, fixation_diameter + buffer], position_of_interest=[0,0])
 print(x_left, x_right, y_bottom, y_top)
 
+colors = ["red", "green", "blue"]
+high_value_color = random.choice(colors)
+# remove high_value_color to get low_value_color
+colors.remove(high_value_color)
+low_value_color = random.choice(colors)
+
+thisExp.addData('high_value_color', high_value_color)
+thisExp.addData('low_value_color', low_value_color)
+
 for thisTrial in trials:
     # Show hollow fixation
     fixation.fillColor = None
@@ -182,6 +191,18 @@ for thisTrial in trials:
     
     # Reset timer for new reaction time
     square_timer = core.Clock()  # Timer for when the square is displayed
+
+    # randomly choosing the colour of the square.
+    square_color = random.choice([high_value_color, low_value_color], p=[0.5, 0.5])
+    square.fillColor = square_color
+    square.lineColor = square_color
+
+    if square_color == high_value_color:
+        thisExp.addData('colour_condition', 'high_value_color')
+        thisExp.addData('square_color', high_value_color)
+    else:
+        thisExp.addData('colour_condition', 'low_value_color')
+        thisExp.addData('square_color', low_value_color)
     
     # Display blue square randomly on left or right
     side = random.choice(['left', 'right'])
@@ -225,11 +246,15 @@ for thisTrial in trials:
     # Reset fixation to hollow for next trial
     fixation.fillColor = None
 
-    # Display star image for 1000ms as reward
-    star_image = visual.ImageStim(win, image='star.jpg', pos=(0, 0), size=(500, 500))
-    star_image.draw()
-    win.flip()
-    core.wait(1)  # Display for 1000 ms
+    if square_color == high_value_color:
+        # Display star image for 1500s as reward
+        trigger = "reward"
+        star_image = visual.ImageStim(win, image='star.jpg', pos=(0, 0), size=(500, 500))
+        star_image.draw()
+        win.flip()
+        core.wait(1.5)  # Display for 1000 ms
+    else:
+        trigger = "no_reward"
     
     # Inter-trial blank screen
     win.flip()
@@ -249,8 +274,6 @@ for thisTrial in trials:
         core.quit()  # stop study
 
 # Clean up
-thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
-thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
 Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
 win.close()
 core.quit()

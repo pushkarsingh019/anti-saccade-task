@@ -124,8 +124,8 @@ fixation = visual.Circle(win, radius=fixation_diameter/2, lineColor='white', fil
 square = visual.Rect(win, width=50, height=50, fillColor='blue', lineColor='blue')
 
 # Timing in milliseconds
-time_in_roi = 800
-time_in_new_roi = 1000  # New ROI time in milliseconds
+time_in_roi = 500 # Fixation ROI time
+time_in_new_roi = 1000  # Antisaccade ROI time.
 inter_trial_interval = 1000
 
 # Trial conditions
@@ -156,6 +156,13 @@ Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
  # 
 x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter + buffer, fixation_diameter + buffer], position_of_interest=[0,0])
 print(x_left, x_right, y_bottom, y_top)
+
+colors = ['red', 'green', 'blue']
+frequent_color = random.choice(colors)
+infrequent_color = random.choice([color for color in colors if color != frequent_color])
+
+thisExp.addData('frequent_color', frequent_color)
+thisExp.addData('infrequent_color', infrequent_color)
 
 for thisTrial in trials:
     # Show hollow fixation
@@ -196,6 +203,14 @@ for thisTrial in trials:
         x_start, x_end, y_bottom, y_top = get_area_of_interest(winsize, [50,50], [-300, 0])
         x_lim = x_start
 
+    square_color = random.choice([frequent_color, infrequent_color], p=[0.9, 0.1])
+
+    if square_color == frequent_color:
+        thisExp.addData('colour_condition', 'frequent_color')
+        thisExp.addData('square_color', frequent_color)
+    else:
+        thisExp.addData('colour_condition', 'infrequent_color')
+        thisExp.addData('square_color', infrequent_color)
     
     # Draw both fixation (which is now white) and square
     fixation.draw()
@@ -234,7 +249,7 @@ for thisTrial in trials:
     thisExp.nextEntry()
 
     # Save data to file after each trial
-    write_buffer_to_file(gaze_data_buffer, f'{experiment_name}_{participant_id}_eye_data.csv')
+    write_buffer_to_file(gaze_data_buffer, os.path.join(data_folder,f'{experiment_name}_{participant_id}_eye_data.csv'))
 
     ### Check for closing experiment
     keys = event.getKeys()  # collect list of pressed keys
@@ -244,8 +259,6 @@ for thisTrial in trials:
         core.quit()  # stop study
 
 # Clean up
-thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
-thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
 Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
 win.close()
 core.quit()
