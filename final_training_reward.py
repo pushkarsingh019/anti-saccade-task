@@ -115,7 +115,8 @@ gaze_data_buffer = []
 win = visual.Window(size=winsize,units='pix',fullscr=True, screen = 2, color='black')
 
 # Fixation circle
-fixation = visual.Circle(win, radius=10, lineColor='white', fillColor=None, pos=(0, 0))
+fixation_diameter = 20
+fixation = visual.Circle(win, radius=fixation_diameter/2, lineColor='white', fillColor=None, pos=(0, 0))
 
 # Blue square for new task
 square = visual.Rect(win, width=50, height=50, fillColor='blue', lineColor='blue')
@@ -151,7 +152,7 @@ Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
 
  # setting AOI boundaries for fixation
  # 
-x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20,20], position_of_interest=[0,0])
+x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter, fixation_diameter], position_of_interest=[0,0])
 print(x_left, x_right, y_bottom, y_top)
 
 for thisTrial in trials:
@@ -237,7 +238,7 @@ for thisTrial in trials:
     thisExp.nextEntry()
 
     # Save data to file after each trial
-    write_buffer_to_file(gaze_data_buffer, os.path.join(data_folder, f'{experiment_name}_{participant_id}_eye_data.csv'))
+    write_buffer_to_file(gaze_data_buffer, f'{experiment_name}_{participant_id}_eye_data.csv')
 
     ### Check for closing experiment
     keys = event.getKeys()  # collect list of pressed keys
@@ -247,8 +248,8 @@ for thisTrial in trials:
         core.quit()  # stop study
 
 # Clean up
-# thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
-# thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
+thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
+thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
 Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
 win.close()
 core.quit()

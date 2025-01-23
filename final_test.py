@@ -274,7 +274,7 @@ for thisTrial in trials:
     thisExp.nextEntry()
 
     # Save data to file after each trial
-    write_buffer_to_file(gaze_data_buffer, os.path.join(data_folder, f'{experiment_name}_{participant_id}_eye_data.csv'))
+    write_buffer_to_file(gaze_data_buffer, f'{experiment_name}_{participant_id}_eye_data.csv')
 
     ### Check for closing experiment
     keys = event.getKeys()  # collect list of pressed keys
@@ -284,8 +284,8 @@ for thisTrial in trials:
         core.quit()  # stop study
 
 # Clean up
-# thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
-# thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
+thisExp.saveAsWideText(f'{experiment_name}_{participant_id}.csv', delim=',')
+thisExp.saveAsPickle(f'{experiment_name}_{participant_id}.pkl')
 Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
 win.close()
 core.quit()
