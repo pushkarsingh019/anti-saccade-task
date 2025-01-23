@@ -158,8 +158,8 @@ x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsiz
 print(x_left, x_right, y_bottom, y_top)
 
 colors = ['red', 'green', 'blue']
-frequent_color = random.choice(colors)
-infrequent_color = random.choice([color for color in colors if color != frequent_color])
+frequent_color = np.random.choice(colors)
+infrequent_color = np.random.choice([color for color in colors if color != frequent_color])
 
 thisExp.addData('frequent_color', frequent_color)
 thisExp.addData('infrequent_color', infrequent_color)
@@ -203,7 +203,7 @@ for thisTrial in trials:
         x_start, x_end, y_bottom, y_top = get_area_of_interest(winsize, [50,50], [-300, 0])
         x_lim = x_start
 
-    square_color = random.choice([frequent_color, infrequent_color], p=[0.9, 0.1])
+    square_color = np.random.choice([frequent_color, infrequent_color], p=[0.9, 0.1])
 
     if square_color == frequent_color:
         thisExp.addData('colour_condition', 'frequent_color')
@@ -211,6 +211,9 @@ for thisTrial in trials:
     else:
         thisExp.addData('colour_condition', 'infrequent_color')
         thisExp.addData('square_color', infrequent_color)
+
+    square.fillColor = square_color
+    square.lineColor = square_color
     
     # Draw both fixation (which is now white) and square
     fixation.draw()

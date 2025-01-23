@@ -157,10 +157,10 @@ x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsiz
 print(x_left, x_right, y_bottom, y_top)
 
 colors = ["red", "green", "blue"]
-high_value_color = random.choice(colors)
+high_value_color = np.random.choice(colors)
 # remove high_value_color to get low_value_color
 colors.remove(high_value_color)
-low_value_color = random.choice(colors)
+low_value_color = np.random.choice(colors)
 
 thisExp.addData('high_value_color', high_value_color)
 thisExp.addData('low_value_color', low_value_color)
@@ -193,7 +193,7 @@ for thisTrial in trials:
     square_timer = core.Clock()  # Timer for when the square is displayed
 
     # randomly choosing the colour of the square.
-    square_color = random.choice([high_value_color, low_value_color], p=[0.5, 0.5])
+    square_color = np.random.choice([high_value_color, low_value_color], p=[0.5, 0.5])
     square.fillColor = square_color
     square.lineColor = square_color
 
