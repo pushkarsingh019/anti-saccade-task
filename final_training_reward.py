@@ -15,6 +15,7 @@ r = np.zeros(3)
 participant_id = 123
 winsize = [1366,768]
 experiment_name = 'training_phase'
+buffer = 40
 
 
 # functions to store eye-tracking data
@@ -152,7 +153,7 @@ Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
 
  # setting AOI boundaries for fixation
  # 
-x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter, fixation_diameter], position_of_interest=[0,0])
+x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter + buffer, fixation_diameter + buffer], position_of_interest=[0,0])
 print(x_left, x_right, y_bottom, y_top)
 
 for thisTrial in trials:

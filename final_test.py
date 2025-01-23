@@ -19,6 +19,7 @@ r = np.zeros(3)
 participant_id = 456
 winsize = [1366,768]
 experiment_name = 'Test Experiment'
+buffer = 40
 
 # functions to store eye-tracking data
 
@@ -115,7 +116,9 @@ gaze_data_buffer = []
 win = visual.Window(size=winsize,units='pix',fullscr=True, screen = 2, color='black')
 
 # Fixation circle
-fixation = visual.Circle(win, radius=10, lineColor='white', fillColor=None, pos=(0, 0))
+# Fixation circle
+fixation_diameter = 20 
+fixation = visual.Circle(win, radius=fixation_diameter/2, lineColor='white', fillColor=None, pos=(0, 0))
 
 # Shapes for test phase
 circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white')
@@ -158,9 +161,11 @@ trials = data.TrialHandler(trial_conditions, nReps=1, method='random',
 # Start recording
 Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
 
-# Finding the Area of Interest for Fixation
-x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20,20], position_of_interest=[0,0])
-print("fixation - area of interest : ",x_left, x_right, y_bottom, y_top)
+ # setting AOI boundaries for fixation
+ # 
+x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter + buffer, fixation_diameter + buffer], position_of_interest=[0,0])
+print(x_left, x_right, y_bottom, y_top)
+
 
 for thisTrial in trials:
     # Show fixation
