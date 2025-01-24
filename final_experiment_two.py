@@ -134,13 +134,12 @@ data_folder = 'data'
 if not os.path.exists(data_folder):
     os.makedirs(data_folder)
 
-
-colors = ['red', 'green', 'blue']
-frequent_color = np.random.choice(colors)
-infrequent_color = np.random.choice([color for color in colors if color != frequent_color])
-# also add the remaining color as control colour
-colors.remove(frequent_color)
-colors.remove(infrequent_color)
+colors = ["red", "green", "blue"]
+high_value_color = np.random.choice(colors)
+# remove high_value_color to get low_value_color
+colors.remove(high_value_color)
+low_value_color = np.random.choice(colors)
+colors.remove(low_value_color)
 control_color = colors[0]
 
 # Trial conditions for training
@@ -180,8 +179,8 @@ Eyetracker.subscribe_to(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
 x_left, x_right, y_bottom, y_top = get_area_of_interest(screen_resolution=winsize, area_of_interest=[fixation_diameter + buffer, fixation_diameter + buffer], position_of_interest=[0,0])
 print(x_left, x_right, y_bottom, y_top)
 
-thisExp.addData('frequent_color', frequent_color)
-thisExp.addData('infrequent_color', infrequent_color)
+thisExp.addData('high_value_color', high_value_color)
+thisExp.addData('low_value_color', low_value_color)
 thisExp.addData('control_color', control_color)
 
 for thisTrial in training_trials:
@@ -210,6 +209,18 @@ for thisTrial in training_trials:
     
     # Reset timer for new reaction time
     square_timer = core.Clock()  # Timer for when the square is displayed
+
+    # randomly choosing the colour of the square.
+    square_color = np.random.choice([high_value_color, low_value_color], p=[0.5, 0.5])
+    square.fillColor = square_color
+    square.lineColor = square_color
+
+    if square_color == high_value_color:
+        thisExp.addData('colour_condition', 'high_value_color')
+        thisExp.addData('square_color', high_value_color)
+    else:
+        thisExp.addData('colour_condition', 'low_value_color')
+        thisExp.addData('square_color', low_value_color)
     
     # Display blue square randomly on left or right
     side = random.choice(['left', 'right'])
@@ -223,17 +234,6 @@ for thisTrial in training_trials:
         x_start, x_end, y_bottom, y_top = get_area_of_interest(winsize, [50,50], [-300, 0])
         x_lim = x_start
 
-    square_color = np.random.choice([frequent_color, infrequent_color], p=[0.9, 0.1])
-
-    if square_color == frequent_color:
-        thisExp.addData('colour_condition', 'frequent_color')
-        thisExp.addData('square_color', frequent_color)
-    else:
-        thisExp.addData('colour_condition', 'infrequent_color')
-        thisExp.addData('square_color', infrequent_color)
-
-    square.fillColor = square_color
-    square.lineColor = square_color
     
     # Draw both fixation (which is now white) and square
     fixation.draw()
@@ -263,6 +263,16 @@ for thisTrial in training_trials:
     
     # Reset fixation to hollow for next trial
     fixation.fillColor = None
+
+    if square_color == high_value_color:
+        # Display star image for 1500s as reward
+        trigger = "reward"
+        star_image = visual.ImageStim(win, image='star.jpg', pos=(0, 0), size=(500, 500))
+        star_image.draw()
+        win.flip()
+        core.wait(1.5)  # Display for 1000 ms
+    else:
+        trigger = "no_reward"
     
     # Inter-trial blank screen
     win.flip()
@@ -272,7 +282,7 @@ for thisTrial in training_trials:
     thisExp.nextEntry()
 
     # Save data to file after each trial
-    write_buffer_to_file(gaze_data_buffer, os.path.join(data_folder,f'{experiment_name}_{participant_id}_eye_data.csv'))
+    write_buffer_to_file(gaze_data_buffer, f'{experiment_name}_{participant_id}_eye_data.csv')
 
     ### Check for closing experiment
     keys = event.getKeys()  # collect list of pressed keys
@@ -399,20 +409,20 @@ for thisTrial in test_trials:
     thisExp.addData('target', thisTrial['target'])
 
     # checking the condition
-    if thisTrial['circle_color'] == frequent_color:
-        thisExp.addData('target_condition', 'frequenct_color')
-    elif thisTrial['circle_color'] == infrequent_color:
-        thisExp.addData('target_condition', 'infrequent_color')
+    if thisTrial['circle_color'] == high_value_color:
+        thisExp.addData('target_condition', 'high_value_color')
+    elif thisTrial['circle_color'] == low_value_color:
+        thisExp.addData('target_condition', 'low_value_color')
     elif thisTrial['circle_color'] == control_color:
         thisExp.addData('target_condition', 'control_color')
     else:
         thisExp.addData('target_condition', 'unknown_color')
     
     # storing the condition of the square
-    if thisTrial['square_color'] == frequent_color:
-        thisExp.addData('distractor_condition', 'frequent_color')
-    elif thisTrial['square_color'] == infrequent_color:
-        thisExp.addData('distractor_condition', 'infrequent_color')
+    if thisTrial['square_color'] == high_value_color:
+        thisExp.addData('distractor_condition', 'high_value_color')
+    elif thisTrial['square_color'] == low_value_color:
+        thisExp.addData('distractor_condition', 'low_value_color')
     elif thisTrial['square_color'] == control_color:
         thisExp.addData('distractor_condition', 'control_color')
     else:
@@ -440,3 +450,5 @@ for thisTrial in test_trials:
 Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
 win.close()
 core.quit()
+
+
