@@ -147,6 +147,7 @@ trial_conditions_training = [{'trial_num': i+1} for i in range(10)]
 
 # Trial conditions for test
 trial_conditions_test = []
+colors = ["red", "green", "blue"]
 for color1 in colors:
     for color2 in colors:
         if color1 != color2:
@@ -184,6 +185,7 @@ thisExp.addData('low_value_color', low_value_color)
 thisExp.addData('control_color', control_color)
 
 for thisTrial in training_trials:
+    thisExp.addData("phase", "training")
     # Show hollow fixation
     fixation.fillColor = None
     trigger = "fixation on screen"
@@ -305,6 +307,7 @@ win.flip()
 # Test Phase
 
 for thisTrial in test_trials:
+    thisExp.addData("phase", "test")
     # Show fixation
     fixation.fillColor = None
     trigger = "fixation"
@@ -397,6 +400,9 @@ for thisTrial in test_trials:
         thisExp.addData('response', 'errant')
     else:
         # Display "Miss" feedback
+        random_circle_color = random.choice(colors)
+        random_square_color = random.choice([color for color in colors if color != random_circle_color])
+        trial_conditions_test.append({'circle_color': random_circle_color, 'square_color': random_square_color, 'target': 'circle'})
         miss_feedback = visual.TextStim(win, text="Miss", pos=(0, 0))
         miss_feedback.draw()
         win.flip()
