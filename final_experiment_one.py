@@ -296,6 +296,8 @@ win.flip()
 
 # Test Phase
 
+missed_trials = 0
+
 for thisTrial in test_trials:
     thisExp.addData("phase", "test")
     # Show fixation
@@ -391,9 +393,7 @@ for thisTrial in test_trials:
     else:
         # Display "Miss" feedbacks
         # Add one more trial with random colors
-        random_circle_color = random.choice(colors)
-        random_square_color = random.choice([color for color in colors if color != random_circle_color])
-        trial_conditions_test.append({'circle_color': random_circle_color, 'square_color': random_square_color, 'target': 'circle'})
+        missed_trials = missed_trials + 1
         miss_feedback = visual.TextStim(win, text="Miss", pos=(0, 0))
         miss_feedback.draw()
         win.flip()
@@ -421,6 +421,152 @@ for thisTrial in test_trials:
     elif thisTrial['square_color'] == infrequent_color:
         thisExp.addData('distractor_condition', 'infrequent_color')
     elif thisTrial['square_color'] == control_color:
+        thisExp.addData('distractor_condition', 'control_color')
+    else:
+        thisExp.addData('distractor_condition', 'unknown_color')
+    
+    # Inter-trial blank screen
+    win.flip()
+    core.wait(inter_trial_interval / 1000)
+
+    # Move to next trial
+    thisExp.nextEntry()
+
+    # Save data to file after each trial
+    write_buffer_to_file(gaze_data_buffer, os.path.join(data_folder,f'{experiment_name}_{participant_id}_eye_data.csv'))
+
+    ### Check for closing experiment
+    keys = event.getKeys()  # collect list of pressed keys
+    if 'escape' in keys:
+        win.close()  # close window
+        Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
+        core.quit()  # stop study
+
+# --- While Loop to Replay Missed Trials ---
+while missed_trials > 0:
+    print("Looping over missed trials.")
+    thisExp.addData("phase", "test")
+    # Show fixation
+    fixation.fillColor = None
+    trigger = "fixation"
+    fixation.draw()
+    win.flip()
+    
+    # Wait for eye in fixation ROI for a certain number of frames
+    fixation_frames = 0
+    frames_per_500ms = int(0.5 / win.monitorFramePeriod)  # Convert 500ms to frames
+    
+    while True:
+        if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
+            fixation_frames += 1
+            if fixation_frames >= frames_per_500ms:
+                fixation.fillColor = 'white'
+                trigger = "gaze on fixation"
+                fixation.draw()
+                win.flip()
+                break
+        else:
+            fixation_frames = 0  # Reset frame count if gaze leaves ROI
+        fixation.draw()
+        win.flip()
+    
+    # Reset timer for response time
+    response_timer = core.Clock()
+    response_timer.reset()
+
+    # Generate random colors for the retry trial
+    random_circle_color = random.choice(colors)
+    random_square_color = random.choice([color for color in colors if color != random_circle_color])
+    
+    # Set colors for this trial
+    circle.fillColor = random_circle_color
+    circle.lineColor = random_circle_color
+    square.fillColor = random_square_color
+    square.lineColor = random_square_color
+    
+    # Display shapes on left and right (circle can be on left or right equally)
+    circle.pos = [-300, 0] if random.choice([True, False]) else [300, 0]
+    square.pos = [300, 0] if circle.pos[0] == -300 else [-300, 0]
+
+    # Define ROIs for targets
+    circle_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=circle.pos)
+    square_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=square.pos)
+
+    # Unpack ROI coordinates
+    circle_x_left, circle_x_right, circle_y_bottom, circle_y_top = circle_roi
+    square_x_left, square_x_right, square_y_bottom, square_y_top = square_roi
+    
+    # Draw shapes and fixation
+    fixation.draw()
+    circle.draw()
+    square.draw()
+    trigger = "Circle and Square on Screen" 
+    win.flip()
+    
+    # Wait for response or timeout
+    correct_response = False
+    errant_response = False
+    response_frames = 0
+    frames_timeout_limit = int(timeout_limit / 1000 / win.monitorFramePeriod)  # Convert timeout_limit to frames
+    
+    while True:
+        if r[0] == 1:  # Check if right eye data is valid
+            if circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
+                correct_response = True
+                break
+            elif square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top:
+                errant_response = True  # Wrong choice (chose square instead of circle)
+                break
+        else:
+            print('Eye not on screen.')
+
+        response_frames += 1
+        if response_frames >= frames_timeout_limit:
+            break  # Timeout
+
+        # Redraw to keep the screen updated
+        fixation.draw()
+        circle.draw()
+        square.draw()
+        win.flip()
+    
+    # Record response data
+    response_time = response_frames * win.monitorFramePeriod * 1000  # Convert back to milliseconds
+    if correct_response:
+        thisExp.addData('response', 'correct')
+        missed_trials = missed_trials - 1
+    elif errant_response:
+        missed_trials = missed_trials - 1
+        thisExp.addData('response', 'errant')
+    else:
+        missed_trials = missed_trials + 1
+        miss_feedback = visual.TextStim(win, text="Miss", pos=(0, 0))
+        miss_feedback.draw()
+        win.flip()
+        core.wait(1)  # Display for 1000 ms
+        thisExp.addData('response', 'miss')
+    
+    thisExp.addData('response_time', response_time)
+    thisExp.addData('circle_color', random_circle_color)
+    thisExp.addData('square_color', random_square_color)
+    thisExp.addData('target', thisTrial['target'])
+
+    # checking the condition
+    if random_circle_color == frequent_color:
+        thisExp.addData('target_condition', 'frequenct_color')
+    elif random_circle_color == infrequent_color:
+        thisExp.addData('target_condition', 'infrequent_color')
+    elif random_circle_color == control_color:
+        thisExp.addData('target_condition', 'control_color')
+    else:
+        thisExp.addData('target_condition', 'unknown_color')
+    
+    # storing the condition of the square
+    if random_square_color == frequent_color:
+        thisExp.addData('distractor_condition', 'frequent_color')
+    elif random_square_color == infrequent_color:
+        thisExp.addData('distractor_condition', 'infrequent_color')
+    elif random_square_color == control_color:
         thisExp.addData('distractor_condition', 'control_color')
     else:
         thisExp.addData('distractor_condition', 'unknown_color')
