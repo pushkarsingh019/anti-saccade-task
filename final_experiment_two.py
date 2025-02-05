@@ -125,7 +125,7 @@ square = visual.Rect(win, width=50, height=50, fillColor='blue', lineColor='blue
 circle = visual.Circle(win, radius=25, fillColor='white', lineColor='white')
 
 # Timing in milliseconds
-time_in_roi = 500 # Fixation ROI time
+time_in_roi = 250 # Fixation ROI time
 time_in_new_roi = 1000  # Antisaccade ROI time.
 inter_trial_interval = 1000
 timeout_limit = 5000
@@ -344,13 +344,12 @@ for thisTrial in test_trials:
     square.fillColor = thisTrial['square_color']
     square.lineColor = thisTrial['square_color']
     
-    # Display shapes on left and right (circle can be on left or right equally)
-    circle.pos = (-300, 0) if random.choice([True, False]) else (300, 0)
-    square.pos = (300, 0) if circle.pos[0] == -300 else (-300, 0)
+    circle.pos = [-300, 0] if random.choice([True, False]) else [300, 0]
+    square.pos = [300, 0] if circle.pos[0] == -300 else [-300, 0]
 
     # Define ROIs for targets
-    circle_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=[-300 if thisTrial['target'] == 'circle' else 300, 0])
-    square_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=[300 if thisTrial['target'] == 'circle' else -300, 0])
+    circle_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=circle.pos)
+    square_roi = get_area_of_interest(screen_resolution=winsize, area_of_interest=[20, 20], position_of_interest=square.pos)
 
     # Unpack ROI coordinates
     circle_x_left, circle_x_right, circle_y_bottom, circle_y_top = circle_roi
