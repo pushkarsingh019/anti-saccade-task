@@ -16,6 +16,9 @@ participant_id = 123
 winsize = [1366,768]
 experiment_name = 'training_phase'
 buffer = 40
+training_reps = 300
+test_reps = 50 # 50*6 conditions = 300 trals
+test_phase_waiting_period = 10 # in seconds.
 
 
 # functions to store eye-tracking data
@@ -144,7 +147,7 @@ colors.remove(infrequent_color)
 control_color = colors[0]
 
 # Trial conditions for training
-trial_conditions_training = [{'trial_num': i+1} for i in range(10)]
+trial_conditions_training = [{'trial_num': i+1} for i in range(training_reps)]
 
 # Trial conditions for test
 trial_conditions_test = []
@@ -169,7 +172,7 @@ training_trials = data.TrialHandler(trial_conditions_training, nReps=1, method='
 
 
 # Setup trial handler
-test_trials = data.TrialHandler(trial_conditions_test, nReps=1, method='random',
+test_trials = data.TrialHandler(trial_conditions_test, nReps=test_reps, method='random',
                            extraInfo={}, originPath=-1,
                            name='trials')
 
@@ -215,7 +218,7 @@ for thisTrial in training_trials:
     
     # Display blue square randomly on left or right
     side = random.choice(['left', 'right'])
-    square_pos = (-300, 0) if side == 'left' else (300, 0)
+    square_pos = [-300, 0] if side == 'left' else [300, 0]
     square.pos = square_pos
     x_lim = 0
     if square_pos == (-300, 0):
@@ -289,7 +292,7 @@ break_text.draw()
 win.flip()
 
 # Wait for 10 seconds
-core.wait(5)
+core.wait(test_phase_waiting_period)
 
 # Clear the screen before starting the test phase
 win.flip()
@@ -308,7 +311,7 @@ for thisTrial in test_trials:
     
     # Wait for eye in fixation ROI for a certain number of frames
     fixation_frames = 0
-    frames_per_500ms = int(0.5 / win.monitorFramePeriod)  # Convert 500ms to frames
+    frames_per_500ms = int((time_in_roi / 1000) / win.monitorFramePeriod)  # Convert 500ms to frames
     
     while True:
         if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
@@ -360,15 +363,11 @@ for thisTrial in test_trials:
     
     while True:
         if r[0] == 1:  # Check if right eye data is valid
-            if thisTrial['target'] == 'circle' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
+            if circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
                 correct_response = True
                 break
-            elif thisTrial['target'] == 'square' and square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top:
-                correct_response = True
-                break
-            elif (thisTrial['target'] == 'circle' and square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top) or \
-                 (thisTrial['target'] == 'square' and circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top):
-                errant_response = True
+            elif square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top:
+                errant_response = True  # Wrong choice (chose square instead of circle)
                 break
         else:
             print('Eye not on screen.')
@@ -453,7 +452,7 @@ while missed_trials > 0:
     
     # Wait for eye in fixation ROI for a certain number of frames
     fixation_frames = 0
-    frames_per_500ms = int(0.5 / win.monitorFramePeriod)  # Convert 500ms to frames
+    frames_per_500ms = int((time_in_roi / 1000) / win.monitorFramePeriod)  # Convert 500ms to frames
     
     while True:
         if r[0] == 1 and x_left <= r[1] <= x_right and y_bottom <= r[2] <= y_top:
