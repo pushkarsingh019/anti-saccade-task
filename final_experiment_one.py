@@ -221,7 +221,7 @@ for thisTrial in training_trials:
     square_pos = [-300, 0] if side == 'left' else [300, 0]
     square.pos = square_pos
     x_lim = 0
-    if square_pos == (-300, 0):
+    if square_pos == [-300, 0]:
         x_start, x_end, y_bottom, y_top = get_area_of_interest(winsize, [50,50], [300, 0])
         x_lim = x_end
     else:
