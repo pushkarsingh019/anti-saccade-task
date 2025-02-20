@@ -198,6 +198,7 @@ awarded_increments = []  # To store the increments actually awarded
 reward_counter = 0  
 
 for thisTrial in training_trials:
+    print('Training trial number:', thisTrial['trial_num'])
     thisExp.addData("phase", "training")
     # Show hollow fixation
     fixation.fillColor = None
@@ -368,6 +369,7 @@ for count in range(5, 0, -1):
 win.flip()
 
 for thisTrial in test_trials:
+    print("Test trial Number : ", thisTrial['trial_num']) 
     thisExp.addData("phase", "test")
     # Show fixation
     fixation.fillColor = None
@@ -506,6 +508,7 @@ for thisTrial in test_trials:
         core.quit()  # stop study
 
 while missed_trials > 0:
+    print('Missed trials:', missed_trials)
     print("Looping over missed trials.")
     thisExp.addData("phase", "test")
     # Show fixation

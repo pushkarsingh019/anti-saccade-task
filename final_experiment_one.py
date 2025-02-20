@@ -189,6 +189,7 @@ thisExp.addData('infrequent_color', infrequent_color)
 thisExp.addData('control_color', control_color)
 
 for thisTrial in training_trials:
+    print("Training trial number: ", thisTrial['trial_num'])
     thisExp.addData("phase", "training")
     # Show hollow fixation
     fixation.fillColor = None
@@ -330,6 +331,7 @@ win.flip()
 missed_trials = 0
 
 for thisTrial in test_trials:
+    print("Test trial number: ", thisTrial['trial_num'])
     thisExp.addData("phase", "test")
     # Show fixation
     fixation.fillColor = None
@@ -470,6 +472,7 @@ for thisTrial in test_trials:
 
 # --- While Loop to Replay Missed Trials ---
 while missed_trials > 0:
+    print(f"Missed trials: {missed_trials}")
     print("Looping over missed trials.")
     thisExp.addData("phase", "test")
     # Show fixation
