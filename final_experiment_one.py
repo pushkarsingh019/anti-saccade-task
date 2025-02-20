@@ -188,8 +188,10 @@ thisExp.addData('frequent_color', frequent_color)
 thisExp.addData('infrequent_color', infrequent_color)
 thisExp.addData('control_color', control_color)
 
+training_num = 0
 for thisTrial in training_trials:
-    print("Training trial number: ", thisTrial['trial_num'])
+    training_num += 1
+    print("Training trial number: ", training_num)
     thisExp.addData("phase", "training")
     # Show hollow fixation
     fixation.fillColor = None
@@ -302,14 +304,9 @@ win.flip()
 event.clearEvents()  # Clear any existing events
 spacebar_pressed = False
 while not spacebar_pressed:
-    keys = event.getKeys(keyList=['space', 'escape'])
+    keys = event.getKeys(keyList=['space'])
     if 'space' in keys:
         spacebar_pressed = True
-    elif 'escape' in keys:
-        # Allow experiment exit during break
-        win.close()
-        Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
-        core.quit()
 
 # After spacebar is pressed, show countdown
 countdown_text = visual.TextStim(win, 
@@ -329,9 +326,10 @@ win.flip()
 # Test Phase
 
 missed_trials = 0
-
+test_num = 0
 for thisTrial in test_trials:
-    print("Test trial number: ", thisTrial['trial_num'])
+    test_num += 1
+    print("Test trial number: ", test_num)
     thisExp.addData("phase", "test")
     # Show fixation
     fixation.fillColor = None

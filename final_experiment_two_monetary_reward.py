@@ -196,9 +196,9 @@ potential_increments = np.random.rand(n_training_trials)
 provisional_total = 0.0
 awarded_increments = []  # To store the increments actually awarded
 reward_counter = 0  
-
+training_num = 0
 for thisTrial in training_trials:
-    print('Training trial number:', thisTrial['trial_num'])
+    print('Training trial number:', training_num)
     thisExp.addData("phase", "training")
     # Show hollow fixation
     fixation.fillColor = None
@@ -344,14 +344,9 @@ win.flip()
 event.clearEvents()  # Clear any existing events
 spacebar_pressed = False
 while not spacebar_pressed:
-    keys = event.getKeys(keyList=['space', 'escape'])
+    keys = event.getKeys(keyList=['space'])
     if 'space' in keys:
         spacebar_pressed = True
-    elif 'escape' in keys:
-        # Allow experiment exit during break
-        win.close()
-        Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
-        core.quit()
 
 # After spacebar is pressed, show countdown
 countdown_text = visual.TextStim(win, 
@@ -367,9 +362,10 @@ for count in range(5, 0, -1):
 
 # Clear the screen before starting test phase
 win.flip()
-
+test_num = 0
 for thisTrial in test_trials:
-    print("Test trial Number : ", thisTrial['trial_num']) 
+    test_num = test_num + 1
+    print("Test trial Number : ", test_num) 
     thisExp.addData("phase", "test")
     # Show fixation
     fixation.fillColor = None
