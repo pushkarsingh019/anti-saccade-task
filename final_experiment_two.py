@@ -296,15 +296,43 @@ for thisTrial in training_trials:
         Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)  # unsubscribe eye tracking
         core.quit()  # stop study
 
-# Add a break before starting the test phase
-break_text = visual.TextStim(win, text="Test phase will begin shortly.", pos=(0, 0), color='white')
-break_text.draw()
+# After training phase ends, replace the break section with this:
+# Display instruction to press spacebar
+spacebar_text = visual.TextStim(win, 
+                              text="Training complete.\nPress the spacebar to begin the test phase.",
+                              pos=(0, 0), 
+                              color='white',
+                              height=30,
+                              wrapWidth=winsize[0]*0.8)
+spacebar_text.draw()
 win.flip()
 
-# Wait for 10 seconds
-core.wait(test_phase_waiting_time)
+# Wait for spacebar press
+event.clearEvents()  # Clear any existing events
+spacebar_pressed = False
+while not spacebar_pressed:
+    keys = event.getKeys(keyList=['space', 'escape'])
+    if 'space' in keys:
+        spacebar_pressed = True
+    elif 'escape' in keys:
+        # Allow experiment exit during break
+        win.close()
+        Eyetracker.unsubscribe_from(tr.EYETRACKER_GAZE_DATA, gaze_data_callback)
+        core.quit()
 
-# Clear the screen before starting the test phase
+# After spacebar is pressed, show countdown
+countdown_text = visual.TextStim(win, 
+                               pos=(0, 0), 
+                               color='white',
+                               height=50)
+
+for count in range(5, 0, -1):
+    countdown_text.text = str(count)
+    countdown_text.draw()
+    win.flip()
+    core.wait(1)  # Wait 1 second between each number
+
+# Clear the screen before starting test phase
 win.flip()
 
 # Test Phase
