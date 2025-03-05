@@ -14,7 +14,7 @@ r = np.zeros(3)
 # For Madhav
 participant_id = 123
 winsize = [1366,768]
-experiment_name = 'training_phase'
+experiment_name = 'experiment_one'
 buffer = 40
 training_reps = 300
 test_reps = 50 # 50*6 conditions = 300 trals
@@ -391,7 +391,7 @@ for thisTrial in test_trials:
     
     while True:
         if r[0] == 1:  # Check if right eye data is valid
-            if circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
+            if min(circle_x_left, circle_x_right) <= r[1] <= max(circle_x_right, circle_x_left) and circle_y_bottom <= r[2] <= circle_y_top:
                 correct_response = True
                 break
             elif square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top:
@@ -538,7 +538,7 @@ while missed_trials > 0:
     
     while True:
         if r[0] == 1:  # Check if right eye data is valid
-            if circle_x_left <= r[1] <= circle_x_right and circle_y_bottom <= r[2] <= circle_y_top:
+            if  min(circle_x_left, circle_x_right) <= r[1] <= max(circle_x_right, circle_x_left) and circle_y_bottom <= r[2] <= circle_y_top:
                 correct_response = True
                 break
             elif square_x_left <= r[1] <= square_x_right and square_y_bottom <= r[2] <= square_y_top:
