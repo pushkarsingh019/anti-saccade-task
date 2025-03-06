@@ -566,7 +566,6 @@ while missed_trials > 0:
         missed_trials = missed_trials - 1
         thisExp.addData('response', 'errant')
     else:
-        missed_trials = missed_trials + 1
         miss_feedback = visual.TextStim(win, text="Miss", pos=(0, 0))
         miss_feedback.draw()
         win.flip()
